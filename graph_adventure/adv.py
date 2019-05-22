@@ -23,6 +23,7 @@ player = Player("Name", world.startingRoom)
 # FILL THIS IN
 traversalPath = ['n', 's']
 
+# initial push
 
 # TRAVERSAL TEST
 visited_rooms = set()
