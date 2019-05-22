@@ -23,21 +23,29 @@ player = Player("Name", world.startingRoom)
 traversalPath = []
 traversalGraph = {}
 
-while len(traversalGraph) != len(roomGraph):
+def opposite_move(move):
+    dictionary = {
+        'n': 's',
+        's': 'n',
+        'e': 'w',
+        'w': 'e'
+    }
+    return dictionary[move]
+
+while len(traversalGraph) < len(roomGraph):
     current_room = player.currentRoom.id
     possible_exits = player.currentRoom.getExits()
 
     if current_room not in traversalGraph:
         traversalGraph[current_room] = {i: '?' for i in possible_exits}
-        
-    print(f'current_room: {current_room}')
-    print(f'traversalGraph: {traversalGraph}')
+    # print(f'current_room: {current_room}')
+    # print(f'traversalGraph: {traversalGraph}')
 
     next_move = None
     for move in traversalGraph[current_room]:
-        print(f'move: {move}')
-        print(f'traversalGraph[current_room]: {traversalGraph[current_room]}')
-        print(f'traversalGraph[current_room][move]: {traversalGraph[current_room][move]}')
+        # print(f'move: {move}')
+        # print(f'traversalGraph[current_room]: {traversalGraph[current_room]}')
+        # print(f'traversalGraph[current_room][move]: {traversalGraph[current_room][move]}')
         if traversalGraph[current_room][move] == '?':
             next_move = move
             print(f'next_move: {next_move}')
@@ -49,7 +57,11 @@ while len(traversalGraph) != len(roomGraph):
                 if next_room not in traversalGraph:
                     print(f'current_room: {current_room}')
                     traversalGraph[next_room] = {i: '?' for i in possible_exits}
-        break
+            traversalGraph[current_room][next_move] = next_room
+            traversalGraph[next_room][opposite_move(next_move)] = current_room
+            current_room = next_room
+            print(f'traversalGraph: {traversalGraph}')
+            break
 
 print(f'finished traversalPath', traversalPath)
 print(f'finished traversalGraph', traversalGraph)
