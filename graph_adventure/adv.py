@@ -23,6 +23,7 @@ player = Player("Name", world.startingRoom)
 traversalPath = []
 traversalGraph = {}
 
+## gets opposite direction
 def opposite_move(move):
     dictionary = {
         'n': 's',
@@ -32,6 +33,7 @@ def opposite_move(move):
     }
     return dictionary[move]
 
+## gets next direction
 def get_path(graph, current_room):
     queue = []
     queue.append([current_room])
@@ -48,19 +50,24 @@ def get_path(graph, current_room):
             visited.add(room)
             # print(f'graph[room]: {graph[room]}')
             for move in graph[room]:
+                ## if move is '?' then return path
                 if graph[room][move] == '?':
                     return path
+            ## if move is not '?' append to queue
             for move in graph[room]:
                 # print(f'move: {move}')
                 next_room = graph[room][move]
                 new_path = path.copy()
                 new_path.append(next_room)
                 queue.append(new_path)
+    ## returns None when queue is empty
     return None
 
 while len(traversalGraph) != len(roomGraph):
+    ## room number
     current_room = player.currentRoom.id
 
+    ## if room not in graph then add it with possible moves
     if current_room not in traversalGraph:
         traversalGraph[current_room] = {i: '?' for i in player.currentRoom.getExits()}
     # print(f'current_room: {current_room}')
@@ -71,14 +78,17 @@ while len(traversalGraph) != len(roomGraph):
         # print(f'move: {move}')
         # print(f'traversalGraph[current_room]: {traversalGraph[current_room]}')
         # print(f'traversalGraph[current_room][move]: {traversalGraph[current_room][move]}')
+        ## if move is '?' then go that way
         if traversalGraph[current_room][move] == '?':
             next_move = move
             # print(f'next_move: {next_move}')
+            ## if next_move is available move to next_room
             if next_move is not None:
                 traversalPath.append(next_move)
                 player.travel(next_move)
                 next_room = player.currentRoom.id
                 # print(f'next_room: {next_room}')
+                ## if next_room is not in graph then add it with possible moves
                 if next_room not in traversalGraph:
                     # print(f'current_room: {current_room}')
                     traversalGraph[next_room] = {i: '?' for i in player.currentRoom.getExits()}
@@ -92,11 +102,14 @@ while len(traversalGraph) != len(roomGraph):
     path = get_path(traversalGraph, current_room)
     # print(f'path: {path}')
 
+    ## if path is not completed use breadth first to reverse path
     if path is not None:
         for room in path:
             # print(f'room: {room}')
             # print(f'current_room: {current_room}')
+            ## go back to starting point
             for move in traversalGraph[current_room]:
+                ## go this direction if equal to move in room
                 if traversalGraph[current_room][move] == room:
                     traversalPath.append(move)
                     player.travel(move)
