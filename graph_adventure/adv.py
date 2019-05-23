@@ -113,7 +113,6 @@ while len(traversalGraph) != len(roomGraph):
                 if traversalGraph[current_room][move] == room:
                     traversalPath.append(move)
                     player.travel(move)
-            current_room = player.currentRoom.id
 
 # print(f'finished traversalPath', traversalPath)
 # print(f'finished traversalGraph', traversalGraph)
