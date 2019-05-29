@@ -19,10 +19,103 @@ world.loadGraph(roomGraph)
 world.printRooms()
 player = Player("Name", world.startingRoom)
 
-
 # FILL THIS IN
-traversalPath = ['n', 's']
+traversalPath = []
+traversalGraph = {}
 
+## gets opposite direction
+def opposite_move(move):
+    dictionary = {
+        'n': 's',
+        'e': 'w',
+        's': 'n',
+        'w': 'e'
+    }
+    return dictionary[move]
+
+## gets next direction
+def get_path(graph, current_room):
+    queue = []
+    queue.append([current_room])
+    visited = set()
+
+    while queue:
+        # print(f'queue: {queue}')
+        # print(f'visited: {visited}')
+        path = queue.pop(0)
+        room = path[-1]
+        # print(f'path: {path}')
+        # print(f'room: {room}')
+        if room not in visited:
+            visited.add(room)
+            # print(f'graph[room]: {graph[room]}')
+            for move in graph[room]:
+                ## if move is '?' then return path
+                if graph[room][move] == '?':
+                    return path
+            ## if move is not '?' append to queue
+            for move in graph[room]:
+                # print(f'move: {move}')
+                next_room = graph[room][move]
+                new_path = path.copy()
+                new_path.append(next_room)
+                queue.append(new_path)
+    ## returns None when queue is empty
+    return None
+
+while len(traversalGraph) != len(roomGraph):
+    ## room number
+    current_room = player.currentRoom.id
+
+    ## if room not in graph then add it with possible moves
+    if current_room not in traversalGraph:
+        traversalGraph[current_room] = {i: '?' for i in player.currentRoom.getExits()}
+    # print(f'current_room: {current_room}')
+    # print(f'traversalGraph: {traversalGraph}')
+
+    next_move = None
+    for move in traversalGraph[current_room]:
+        # print(f'move: {move}')
+        # print(f'traversalGraph[current_room]: {traversalGraph[current_room]}')
+        # print(f'traversalGraph[current_room][move]: {traversalGraph[current_room][move]}')
+        ## if move is '?' then go that way
+        if traversalGraph[current_room][move] == '?':
+            next_move = move
+            # print(f'next_move: {next_move}')
+            ## if next_move is available move to next_room
+            if next_move is not None:
+                traversalPath.append(next_move)
+                player.travel(next_move)
+                next_room = player.currentRoom.id
+                # print(f'next_room: {next_room}')
+                ## if next_room is not in graph then add it with possible moves
+                if next_room not in traversalGraph:
+                    # print(f'current_room: {current_room}')
+                    traversalGraph[next_room] = {i: '?' for i in player.currentRoom.getExits()}
+
+            traversalGraph[current_room][next_move] = next_room
+            traversalGraph[next_room][opposite_move(next_move)] = current_room
+            current_room = next_room
+            # print(f'traversalGraph: {traversalGraph}')
+            break
+    
+    path = get_path(traversalGraph, current_room)
+    # print(f'path: {path}')
+
+    ## if path is not completed use breadth first to reverse path
+    if path is not None:
+        for room in path:
+            # print(f'room: {room}')
+            # print(f'current_room: {current_room}')
+            ## go back to starting point
+            for move in traversalGraph[current_room]:
+                ## go this direction if equal to move in room
+                if traversalGraph[current_room][move] == room:
+                    traversalPath.append(move)
+                    player.travel(move)
+
+# print(f'finished traversalPath', traversalPath)
+# print(f'finished traversalGraph', traversalGraph)
 
 # TRAVERSAL TEST
 visited_rooms = set()
@@ -38,15 +131,13 @@ else:
     print("TESTS FAILED: INCOMPLETE TRAVERSAL")
     print(f"{len(roomGraph) - len(visited_rooms)} unvisited rooms")
 
-
-
-#######
+######
 # UNCOMMENT TO WALK AROUND
-#######
-# player.currentRoom.printRoomDescription(player)
-# while True:
-#     cmds = input("-> ").lower().split(" ")
-#     if cmds[0] in ["n", "s", "e", "w"]:
-#         player.travel(cmds[0], True)
-#     else:
-#         print("I did not understand that command.")
+######
+player.currentRoom.printRoomDescription(player)
+while True:
+    cmds = input("-> ").lower().split(" ")
+    if cmds[0] in ["n", "s", "e", "w"]:
+        player.travel(cmds[0], True)
+    else:
+        print("I did not understand that command.")
